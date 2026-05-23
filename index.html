@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GB BARAKA — Full Kalkulyator</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#050505;color:#fff}
+.app{max-width:620px;margin:auto;min-height:100vh;padding:16px;background:radial-gradient(circle at top,#161616,#050505 75%)}
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.emblem{width:88px;height:98px;border:1px solid #c89435;border-radius:16px;background:linear-gradient(145deg,#151515,#050505);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#f5c45b;box-shadow:0 0 18px #000}
+.crown{font-size:24px;line-height:18px}.gb{font-size:42px;font-weight:900;line-height:36px}.brand{font-size:13px;font-weight:900;color:#f5c45b}
+.title{text-align:center;flex:1}
+.title h1{margin:0;font-size:34px;color:#f5c45b;letter-spacing:1px;text-shadow:0 0 10px #8b681f}
+.title p{margin:6px 0 0;font-size:16px;font-weight:900}
+.title .hint{color:#f5c45b;font-size:14px;margin-top:8px}
+.help{border:1px solid #c89435;border-radius:14px;width:58px;height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:900}
+.help b{font-size:24px;color:#f5c45b}
+.tabs{display:grid;grid-template-columns:1fr 1fr;margin-top:18px;border:1px solid #7b5b22;border-radius:14px 14px 0 0;overflow:hidden}
+.tab{padding:15px 8px;border:0;background:#121212;color:#fff;font-weight:900;font-size:14px}
+.tab.active{background:linear-gradient(135deg,#f5c45b,#9d6410);color:#fff}
+.section,.panel{border:1px solid #9e762e;background:linear-gradient(145deg,#111,#070707);padding:14px}
+.section{border-radius:0 0 16px 16px}
+.panel{border-radius:16px;margin-top:12px}
+.panelTitle{font-size:18px;font-weight:900;color:#f5deb0;margin-bottom:12px;display:flex;gap:8px;align-items:center}
+.n{width:24px;height:24px;border-radius:50%;background:linear-gradient(#f6cf69,#a76b12);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:#fff;font-weight:900}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+.block{border:1px solid #77591f;border-radius:14px;padding:12px;background:#0b0b0b}
+.block label{font-weight:900;font-size:13px;color:#fff}
+.block small{display:block;color:#ddd;margin:6px 0 10px}
+.inputLine{display:flex;align-items:center;border:1px solid #b8892f;border-radius:10px;background:#080808;overflow:hidden;margin-top:8px}
+.icon{padding:10px 12px;color:#f5c45b;font-size:22px}
+select,input{width:100%;background:transparent;color:#fff;border:0;outline:0;padding:12px;font-size:18px;font-weight:900}
+option{color:#111}
+.rangeText{display:flex;justify-content:space-between;color:#ddd;font-size:13px;margin-top:10px}
+input[type=range]{accent-color:#d39a2e;padding:0}
+.chosen{text-align:center;color:#5bd36c;font-weight:900;margin-top:8px}
+.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+.quick button{border:1px solid #8b6928;border-radius:9px;background:#0c0c0c;color:#fff;padding:10px 3px;font-weight:900}
+.quick button.active{background:linear-gradient(#f6cf69,#a76b12)}
+.resultGrid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.resultGrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.res{border:1px solid #9e762e;border-radius:14px;background:#0b0b0b;padding:13px;text-align:center}
+.res .label{font-size:12px;font-weight:900;min-height:34px}
+.res .num{font-size:24px;color:#55d66a;font-weight:900;margin-top:8px}
+.res .unit{font-size:13px;color:#fff}
+.purple{border-color:#7d42c9}
+.purple .panelTitle,.purpleTitle{color:#b56cff}
+.purple .n{background:linear-gradient(#a66cff,#5824aa)}
+.purple .res .num{color:#a95cff}
+.formula{border:1px solid #9e762e;border-radius:12px;background:#070707;color:#f5c45b;padding:11px;text-align:center;margin-top:12px;font-weight:800}
+.actions{display:grid;grid-template-columns:1.3fr 1fr;gap:10px;margin-top:14px}
+.actions button,.contactBtn{border:1px solid #9e762e;border-radius:13px;padding:15px;font-size:16px;font-weight:900}
+.primary{background:linear-gradient(#f6cf69,#a76b12);color:#fff}
+.secondary{background:#0b0b0b;color:#fff}
+.contact{border:1px solid #9e762e;border-radius:16px;margin-top:12px;padding:14px;background:linear-gradient(145deg,#111,#070707);text-align:center}
+.contact h3{margin:0 0 8px;color:#f5c45b;font-size:20px}
+.contact .phones{font-size:24px;font-weight:900;line-height:1.5;color:#fff}
+.contact .tg{color:#f5c45b;font-weight:900;margin-top:6px}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);margin-top:14px;border-top:1px solid #222}
+.nav div{text-align:center;color:#c8c8c8;padding:13px 2px;font-size:11px;font-weight:900}
+.nav div:first-child{color:#f5c45b}
+@media(max-width:560px){
+  .row,.row4,.resultGrid3,.resultGrid4,.actions{grid-template-columns:1fr}
+  .title h1{font-size:26px}.tabs{grid-template-columns:1fr}
+  .header{gap:8px}.emblem{width:72px;height:84px}.gb{font-size:34px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="emblem"><div class="crown">♛</div><div class="gb">GB</div><div class="brand">BARAKA</div></div>
+    <div class="title">
+      <h1>GB BARAKA</h1>
+      <p>POLIETILEN PLYONKA KALKULYATORI</p>
+      <div class="hint">▣ 1 kg plyonkadan qancha metr chiqishini va narxini hisoblang</div>
+    </div>
+    <div class="help"><b>?</b><span>Yordam</span></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active">1&nbsp; PLYONKA NARXI BO‘YICHA HISOBLASH</button>
+    <button class="tab">2&nbsp; KVADRAT METR BO‘YICHA HISOBLASH</button>
+  </div>
+
+  <div class="section">
+    <div class="panelTitle">▣ PLYONKA PARAMETRLARI</div>
+    <div class="row">
+      <div class="block">
+        <label><span class="n">1</span> PLYONKA ENI</label>
+        <small>1 m dan 16 m gacha, har 0,5 m</small>
+        <div class="inputLine"><span class="icon">🧻</span><select id="width" onchange="syncWidth()"></select></div>
+        <div class="rangeText"><span>1 m</span><span>16 m</span></div>
+        <input type="range" id="widthRange" min="1" max="16" step="0.5" value="3.5" oninput="syncWidthRange()">
+        <div class="chosen" id="chosenWidth">Tanlangan: 3,5 metr</div>
+      </div>
+      <div class="block">
+        <label><span class="n">2</span> QALINLIGI (MIKRON)</label>
+        <small>10 mikrondan 120 mikrongacha</small>
+        <div class="inputLine"><span class="icon">▱</span><select id="micron" onchange="syncMicron()"></select></div>
+        <div class="rangeText"><span>10 mikron</span><span>120 mikron</span></div>
+        <input type="range" id="micronRange" min="10" max="120" step="10" value="50" oninput="syncMicronRange()">
+        <div class="chosen" id="chosenMicron">Tanlangan: 50 mikron</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panelTitle">▣ MA’LUMOTLARNI KIRITISH</div>
+    <div class="row4">
+      <div class="block"><label><span class="n">3</span> PLYONKA OG‘IRLIGI</label><small>Kilogrammni kiriting</small><div class="inputLine"><span class="icon">⚖</span><input id="kg" type="number" value="10" min="0.1" step="0.1" oninput="calc()"><b style="padding-right:10px">kg</b></div></div>
+      <div class="block"><label><span class="n">4</span> 1 KG PLYONKA NARXI</label><small>1 kg narxini kiriting</small><div class="inputLine"><span class="icon">🪙</span><input id="price" type="number" value="20000" min="0" step="100" oninput="calc()"><b style="padding-right:10px">so‘m</b></div></div>
+      <div class="block"><label><span class="n">5</span> 1 KG DAN CHIQADIGAN UZUNLIK</label><small>Hisoblanadi</small><div class="chosen" id="miniPer">0 metr</div></div>
+      <div class="block"><label><span class="n">6</span> 1 METR NARXI</label><small>Hisoblanadi</small><div class="chosen" id="miniMeterPrice">0 so‘m</div></div>
+    </div>
+    <div class="quick"><button onclick="setKg(1)">1 kg</button><button onclick="setKg(5)">5 kg</button><button class="active" onclick="setKg(10)">10 kg</button><button onclick="setKg(25)">25 kg</button><button onclick="setKg(50)">50 kg</button></div>
+  </div>
+
+  <div class="panel">
+    <div class="panelTitle">▣ NATIJALAR</div>
+    <div class="resultGrid4">
+      <div class="res"><div class="label">JAMI UZUNLIK<br>(Siz kiritgan kg uchun)</div><div class="num" id="totalM">0</div><div class="unit">metr</div></div>
+      <div class="res"><div class="label">JAMI SUMMA<br>(Siz kiritgan kg uchun)</div><div class="num" id="sumKg">0</div><div class="unit">so‘m</div></div>
+      <div class="res"><div class="label">1 KG DAN CHIQADIGAN UZUNLIK</div><div class="num" id="perKg">0</div><div class="unit">metr</div></div>
+      <div class="res"><div class="label">1 METR NARXI</div><div class="num" id="meterPrice">0</div><div class="unit">so‘m</div></div>
+    </div>
+  </div>
+
+  <div class="panel purple">
+    <div class="panelTitle">▣ KVADRAT METR BO‘YICHA HISOBLASH</div>
+    <small style="color:#c99cff">Kerakli maydon uchun necha kg va necha so‘m kerak bo‘ladi</small>
+    <div class="row4" style="margin-top:12px">
+      <div class="block"><label><span class="n">1</span> PLYONKA ENI</label><div class="inputLine"><span class="icon">🧻</span><select id="width2" onchange="copyWidth2()"></select></div></div>
+      <div class="block"><label><span class="n">2</span> QALINLIGI</label><div class="inputLine"><span class="icon">▱</span><select id="micron2" onchange="copyMicron2()"></select></div></div>
+      <div class="block"><label><span class="n">3</span> KERAKLI MAYDON</label><div class="inputLine"><span class="icon">㎡</span><input id="m2" type="number" value="100" min="0.1" step="0.1" oninput="calc()"><b style="padding-right:10px">m²</b></div></div>
+      <div class="block"><label><span class="n">4</span> 1 KG NARXI</label><div class="inputLine"><span class="icon">🪙</span><input id="price2" type="number" value="20000" min="0" step="100" oninput="syncPrice2()"><b style="padding-right:10px">so‘m</b></div></div>
+    </div>
+    <div class="panelTitle" style="justify-content:center;margin-top:14px">NATIJALAR</div>
+    <div class="resultGrid3">
+      <div class="res"><div class="label">KERAKLI OG‘IRLIK<br>(Taxminiy)</div><div class="num" id="needKg">0</div><div class="unit">kg</div></div>
+      <div class="res"><div class="label">JAMI UZUNLIK<br>(Taxminiy)</div><div class="num" id="needM">0</div><div class="unit">metr</div></div>
+      <div class="res"><div class="label">JAMI SUMMA<br>(Taxminiy)</div><div class="num" id="sumM2">0</div><div class="unit">so‘m</div></div>
+    </div>
+    <div class="formula">Hisoblash formulasi: m² uchun uzunlik = maydon ÷ eni, kg = uzunlik ÷ 1 kgdan chiqadigan metr</div>
+    <div class="actions">
+      <button class="primary" onclick="sendOrder()">🛒 BUYURTMA BERISH<br><small>Buyurtma qoldirish</small></button>
+      <button class="secondary" onclick="showResult()">☎ ALOQA<br><small>Bog‘lanish</small></button>
+    </div>
+  </div>
+
+  <div class="contact">
+    <h3>ALOQA UCHUN</h3>
+    <div class="phones">📞 77 041 77 55<br>📞 90 048 77 55</div>
+    <div class="tg">Telegram: @gb_baraka</div>
+  </div>
+
+  <div class="nav"><div>▦<br>KALKULYATOR</div><div>🏷<br>NARXLAR</div><div>▣<br>BUYURTMALARIM</div><div>ⓘ<br>MA’LUMOT</div></div>
+</div>
+
+<script>
+const coef=960;
+const w=document.getElementById("width"), m=document.getElementById("micron"), w2=document.getElementById("width2"), m2sel=document.getElementById("micron2");
+function wLabel(v){return (Number.isInteger(v)?String(v):String(v).replace(".",","))+" metr"}
+for(let x=1;x<=16.001;x+=0.5){let val=Math.round(x*10)/10;for(const sel of [w,w2]){let o=document.createElement("option");o.value=val;o.textContent=wLabel(val);if(val===3.5)o.selected=true;sel.appendChild(o)}}
+for(let i=10;i<=120;i+=10){for(const sel of [m,m2sel]){let o=document.createElement("option");o.value=i;o.textContent=i+" mikron";if(i===50)o.selected=true;sel.appendChild(o)}}
+function fmt(n){return Math.round(n).toLocaleString("ru-RU").replace(/,/g," ")}
+function syncWidth(){document.getElementById("widthRange").value=w.value;w2.value=w.value;calc()}
+function syncWidthRange(){w.value=document.getElementById("widthRange").value;w2.value=w.value;calc()}
+function syncMicron(){document.getElementById("micronRange").value=m.value;m2sel.value=m.value;calc()}
+function syncMicronRange(){m.value=document.getElementById("micronRange").value;m2sel.value=m.value;calc()}
+function copyWidth2(){w.value=w2.value;document.getElementById("widthRange").value=w.value;calc()}
+function copyMicron2(){m.value=m2sel.value;document.getElementById("micronRange").value=m.value;calc()}
+function syncPrice2(){document.getElementById("price").value=document.getElementById("price2").value;calc()}
+function setKg(v){document.getElementById("kg").value=v;calc()}
+let lastText="";
+function calc(){
+ const width=+w.value, mic=+m.value, kg=+(document.getElementById("kg").value||0), price=+(document.getElementById("price").value||0);
+ document.getElementById("price2").value=price;
+ const per=coef/(width*mic), total=per*kg, mp=price/per, sum=price*kg;
+ document.getElementById("chosenWidth").innerText="Tanlangan: "+wLabel(width);
+ document.getElementById("chosenMicron").innerText="Tanlangan: "+mic+" mikron";
+ document.getElementById("miniPer").innerText=per.toFixed(2)+" metr";
+ document.getElementById("miniMeterPrice").innerText=fmt(mp)+" so‘m";
+ document.getElementById("totalM").innerText=total.toFixed(2);
+ document.getElementById("sumKg").innerText=fmt(sum);
+ document.getElementById("perKg").innerText=per.toFixed(2);
+ document.getElementById("meterPrice").innerText=fmt(mp);
+
+ const area=+(document.getElementById("m2").value||0);
+ const needM=area/width, needKg=needM/per, sumM2=needKg*price;
+ document.getElementById("needKg").innerText=needKg.toFixed(2);
+ document.getElementById("needM").innerText=needM.toFixed(2);
+ document.getElementById("sumM2").innerText=fmt(sumM2);
+
+ lastText=`GB BARAKA hisob-kitob:
+Eni: ${wLabel(width)}
+Qalinligi: ${mic} mikron
+1 kg narxi: ${fmt(price)} so‘m
+
+${kg} kg = ${total.toFixed(2)} metr
+1 metr narxi = ${fmt(mp)} so‘m
+Jami summa = ${fmt(sum)} so‘m
+
+${area} m² uchun:
+Kerakli kg = ${needKg.toFixed(2)} kg
+Uzunlik = ${needM.toFixed(2)} metr
+Jami summa = ${fmt(sumM2)} so‘m
+
+Aloqa:
+77 041 77 55
+90 048 77 55
+@gb_baraka`;
+}
+function showResult(){if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.showAlert(lastText)}else{alert(lastText)}}
+function sendOrder(){if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.sendData(lastText);Telegram.WebApp.close()}else{window.open("https://t.me/gb_baraka?text="+encodeURIComponent(lastText),"_blank")}}
+if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.expand()}
+calc();
+</script>
+</body>
+</html>
