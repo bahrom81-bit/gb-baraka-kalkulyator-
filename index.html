@@ -49,6 +49,11 @@ input[type=range]{accent-color:#d8a334;padding:0}
 .nav{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:14px;border-top:1px solid #333}
 .nav div{text-align:center;padding:12px 4px;color:#bdbdbd;font-size:12px;font-weight:800}
 .nav div:first-child{color:#f2c45a}
+@media(max-width:430px){
+  .two{grid-template-columns:1fr}
+  .title h1{font-size:26px}
+  .cards{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -64,10 +69,10 @@ input[type=range]{accent-color:#d8a334;padding:0}
     <div class="two">
       <div>
         <div class="head"><span class="step">1</span>PLYONKA ENI</div>
-        <p class="sub">1 metrdan 16 metrgacha</p>
+        <p class="sub">1 metrdan 16 metrgacha, har 0,5 m</p>
         <div class="selectWrap">🧻<select id="width" onchange="syncWidth()"></select></div>
         <div class="rangeLine"><span>1 m</span><span>16 m</span></div>
-        <input type="range" id="widthRange" min="1" max="16" step="1" value="4" oninput="syncWidthRange()">
+        <input type="range" id="widthRange" min="1" max="16" step="0.5" value="4" oninput="syncWidthRange()">
         <div class="chosen" id="chosenWidth">Tanlangan: 4 metr</div>
       </div>
       <div>
@@ -118,27 +123,49 @@ input[type=range]{accent-color:#d8a334;padding:0}
 
 <script>
 const width=document.getElementById("width"), micron=document.getElementById("micron");
-for(let i=1;i<=16;i++){let o=document.createElement("option");o.value=i;o.textContent=i+".0 metr";if(i===4)o.selected=true;width.appendChild(o)}
-for(let i=10;i<=120;i+=10){let o=document.createElement("option");o.value=i;o.textContent=i+" mikron";if(i===50)o.selected=true;micron.appendChild(o)}
+
+function widthLabel(v){
+  return (Number.isInteger(v) ? String(v) : String(v).replace(".", ",")) + " metr";
+}
+
+for(let x=1; x<=16.0001; x+=0.5){
+  const val = Math.round(x*10)/10;
+  let o=document.createElement("option");
+  o.value=val;
+  o.textContent=widthLabel(val);
+  if(val===4)o.selected=true;
+  width.appendChild(o);
+}
+
+for(let i=10;i<=120;i+=10){
+  let o=document.createElement("option");
+  o.value=i;
+  o.textContent=i+" mikron";
+  if(i===50)o.selected=true;
+  micron.appendChild(o);
+}
+
 function fmt(n){return Math.round(n).toLocaleString("ru-RU").replace(/,/g," ")}
 function syncWidth(){document.getElementById("widthRange").value=width.value;calc()}
 function syncWidthRange(){width.value=document.getElementById("widthRange").value;calc()}
 function syncMicron(){document.getElementById("micronRange").value=micron.value;calc()}
 function syncMicronRange(){micron.value=document.getElementById("micronRange").value;calc()}
 function setKg(n){document.getElementById("kg").value=n;calc()}
+
 let lastText="";
 function calc(){
  const w=+width.value,m=+micron.value,kg=+(document.getElementById("kg").value||0),price=+(document.getElementById("price").value||0);
- const coef=960; // 4 m, 50 mikron = 4.8 m chiqishi uchun
+ const coef=960;
  const per=coef/(w*m), total=per*kg, mp=price/per, sum=price*kg;
- document.getElementById("chosenWidth").innerText=`Tanlangan: ${w}.0 metr`;
+ document.getElementById("chosenWidth").innerText=`Tanlangan: ${widthLabel(w)}`;
  document.getElementById("chosenMicron").innerText=`Tanlangan: ${m} mikron`;
  document.getElementById("perKg").innerText=per.toFixed(2);
  document.getElementById("meterPrice").innerText=fmt(mp);
  document.getElementById("totalM").innerText=total.toFixed(2);
  document.getElementById("totalSum").innerText=fmt(sum);
- lastText=`GB BARAKA hisob-kitob:\nEni: ${w} m\nQalinligi: ${m} mikron\nOg‘irligi: ${kg} kg\n1 kg narxi: ${fmt(price)} so‘m\n1 kgdan: ${per.toFixed(2)} m\n1 metr narxi: ${fmt(mp)} so‘m\nJami: ${total.toFixed(2)} m\nJami summa: ${fmt(sum)} so‘m`;
+ lastText=`GB BARAKA hisob-kitob:\nEni: ${widthLabel(w)}\nQalinligi: ${m} mikron\nOg‘irligi: ${kg} kg\n1 kg narxi: ${fmt(price)} so‘m\n1 kgdan: ${per.toFixed(2)} m\n1 metr narxi: ${fmt(mp)} so‘m\nJami: ${total.toFixed(2)} m\nJami summa: ${fmt(sum)} so‘m`;
 }
+
 function showResult(){ if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.showAlert(lastText)}else{alert(lastText)}}
 function sendOrder(){ if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.sendData(lastText);Telegram.WebApp.close()}else{window.open("https://t.me/gb_baraka?text="+encodeURIComponent(lastText),"_blank")}}
 if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.expand()}
